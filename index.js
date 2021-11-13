@@ -19,6 +19,7 @@ async function run() {
         const database = client.db("store");
         const storeCollection = database.collection("watchs");
         const orderCollection = database.collection('order');
+        const usersCollection = database.collection('user');
         // post api
         app.post('/watchs', async (req, res) => {
             const watch = req.body;
@@ -46,6 +47,21 @@ async function run() {
             const allorders = await storeCollection.findOne(query);
             res.send(allorders);
         });
+        // get all user
+        app.get('/users', async (req, res) => {
+            const cursor = usersCollection.find({});
+            const allUser = await cursor.toArray();
+            res.json(allUser);
+        });
+        // upsert api 
+        app.put('/users', async (req, res) => {
+            const user = req.body;
+            const filter = { email: user.email };
+            const options = { upsert: true };
+            const update = { $set: user };
+            const result = await usersCollection.updateOne(filter, update, options);
+            res.json(result)
+        })
         //get my orders
         app.get("/myorders/:email", async (req, res) => {
             const result = await orderCollection.find({
@@ -98,7 +114,33 @@ async function run() {
             };
             const result = await orderCollection.updateOne(filter, statusUpdate, options);
             res.json(result)
-        })
+        });
+        //make admin role
+        app.put('/users/:id', async (req, res) => {
+            const id = req.params.id;
+            console.log(id);
+            const filter = { _id: ObjectId(id) };
+            const options = { upsert: true };
+            const roleUpdate = {
+                $set: {
+                    role: 'admin'
+                }
+            };
+            const result = await usersCollection.updateOne(filter, roleUpdate, options);
+            res.json(result)
+        });
+        //make admin role api
+        app.get("/users/:email", async (req, res) => {
+            const userEmail = req.params.email;
+            const userQuery = { email: userEmail };
+            const userRole = await usersCollection.findOne(userQuery);
+            let isAdmin = false;
+            if (userRole?.role === "admin") {
+                isAdmin = true;
+            }
+            res.json({ admin: isAdmin });
+            console.log({ admin: isAdmin })
+        });
 
     } finally {
         //   await client.close();
