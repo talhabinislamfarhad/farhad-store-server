@@ -93,7 +93,7 @@ async function run() {
             const options = { upsert: true };
             const statusUpdate = {
                 $set: {
-                    status: 'approved'
+                    status: 'Approved'
                 }
             };
             const result = await orderCollection.updateOne(filter, statusUpdate, options);
