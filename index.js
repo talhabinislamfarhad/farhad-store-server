@@ -20,6 +20,7 @@ async function run() {
         const storeCollection = database.collection("watchs");
         const orderCollection = database.collection('order');
         const usersCollection = database.collection('user');
+        const reviewCollection = database.collection('review');
         // post api
         app.post('/watchs', async (req, res) => {
             const watch = req.body;
@@ -33,7 +34,18 @@ async function run() {
             const result = await watch.toArray();
             res.send(result);
         });
-
+        // review post api
+        app.post('/review', async (req, res) => {
+            const review = req.body;
+            const result = await reviewCollection.insertOne(review);
+            res.json(result)
+        });
+        // get review
+        app.get('/review', async (req, res) => {
+            const review = reviewCollection.find({});
+            const result = await review.toArray();
+            res.send(result);
+        });
         // placorder
         app.post('/placeorder', async (req, res) => {
             const order = req.body;
